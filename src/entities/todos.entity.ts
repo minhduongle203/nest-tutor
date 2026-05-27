@@ -10,4 +10,5 @@ export class TodosEntity {
   categoryID?: number;
   created_at: Date;
   updated_at: Date;
+  userID: number;
 }

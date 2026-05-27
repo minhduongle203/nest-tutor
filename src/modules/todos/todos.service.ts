@@ -3,12 +3,17 @@ import { TodosEntity } from '../../entities/todos.entity';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { QueryParamsDto } from './dto/query-params.dto';
+import { Injectable } from '@nestjs/common';
+import { CategoryService } from '../categories/category.sevice';
+import { UserService } from '../user/user.service';
 
+@Injectable()
 export class TodosService {
-  private todoRepo: TodosRepository;
-  constructor() {
-    this.todoRepo = new TodosRepository();
-  }
+  constructor(
+    private todoRepo: TodosRepository,
+    private categoriesService: CategoryService,
+    private userService: UserService,
+  ) {}
 
   findAll(queryParamsDto: QueryParamsDto): TodosEntity[] {
     let todos = this.todoRepo.findAll();
@@ -30,6 +35,16 @@ export class TodosService {
   }
 
   create(dto: CreateTodoDto) {
+    const user = this.userService.findById(dto.userID);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    if (dto.categoryID) {
+      const category = this.categoriesService.findById(dto.categoryID);
+      if (!category) {
+        throw new Error('Category not found');
+      }
+    }
     return this.todoRepo.create(dto);
   }
 

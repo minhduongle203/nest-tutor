@@ -5,9 +5,10 @@ import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { TodoStatus } from './enum/todo-status.enum';
 import { TodoPriority } from './enum/todo-priority.enum';
+import { Injectable } from '@nestjs/common';
 
 const TODO_FILE = path.join(__dirname, 'todo.json');
-
+@Injectable()
 export class TodosRepository {
   private readFromFile(): TodosEntity[] {
     const data = fs.readFileSync(TODO_FILE, 'utf-8');
@@ -43,6 +44,7 @@ export class TodosRepository {
       status: dto.status ?? TodoStatus.OPEN,
       priority: dto.priority ?? TodoPriority.MEDIUM,
       categoryID: dto.categoryID,
+      userID: dto.userID,
       created_at: new Date(),
       updated_at: new Date(),
     };

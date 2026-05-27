@@ -32,4 +32,7 @@ export class CreateTodoDto {
   @IsOptional()
   @IsInt({ message: 'Category is Integer!' })
   categoryID: number;
+
+  @IsInt({ message: 'User is Integer!' })
+  userID: number;
 }
