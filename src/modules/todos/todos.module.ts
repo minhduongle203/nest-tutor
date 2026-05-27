@@ -4,9 +4,15 @@ import { TodosRepository } from './todos.repository';
 import { TodosService } from './todos.service';
 import { CategoriesModule } from '../categories/category.module';
 import { UsersModule } from '../user/user.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TodosEntity } from '../../entities/todos.entity';
 
 @Module({
-  imports: [CategoriesModule, UsersModule],
+  imports: [
+    CategoriesModule,
+    UsersModule,
+    TypeOrmModule.forFeature([TodosEntity]),
+  ],
   controllers: [TodosController],
   providers: [TodosRepository, TodosService],
 })
