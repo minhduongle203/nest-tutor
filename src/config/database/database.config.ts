@@ -1,5 +1,7 @@
 import { registerAs } from '@nestjs/config';
-import { TodosEntity } from '../../entities/todos.entity';
+import { Todos } from '../../entities/todos.entity';
+import { Categories } from '../../entities/category.entity';
+import { Users } from '../../entities/user.entity';
 
 export const DATABASE_REGISTER = 'database';
 
@@ -10,7 +12,7 @@ export default registerAs(DATABASE_REGISTER, () => ({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  entities: [TodosEntity],
+  entities: [Todos, Categories, Users],
   synchronize: true,
   logging: true,
 }));

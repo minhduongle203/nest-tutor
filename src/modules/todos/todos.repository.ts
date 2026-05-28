@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { TodosEntity } from '../../entities/todos.entity';
+import { Todos } from '../../entities/todos.entity';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { TodoStatus } from './enum/todo-status.enum';
@@ -10,23 +10,23 @@ import { Injectable } from '@nestjs/common';
 const TODO_FILE = path.join(__dirname, 'todo.json');
 @Injectable()
 export class TodosRepository {
-  private readFromFile(): TodosEntity[] {
+  private readFromFile(): Todos[] {
     const data = fs.readFileSync(TODO_FILE, 'utf-8');
-    return JSON.parse(data) as TodosEntity[];
+    return JSON.parse(data) as Todos[];
   }
 
-  private writeToFile(data: TodosEntity[]): void {
+  private writeToFile(data: Todos[]): void {
     fs.writeFileSync(TODO_FILE, JSON.stringify(data, null, 2));
   }
 
-  private getNextId(todos: TodosEntity[]): number {
+  private getNextId(todos: Todos[]): number {
     if (todos.length === 0) {
       return 1;
     }
     return todos[todos.length - 1].id + 1;
   }
 
-  findAll(): TodosEntity[] {
+  findAll(): Todos[] {
     return this.readFromFile();
   }
 
@@ -37,14 +37,14 @@ export class TodosRepository {
 
   create(dto: CreateTodoDto) {
     const todos = this.readFromFile();
-    const newTodo: TodosEntity = {
+    const newTodo: Todos = {
       id: this.getNextId(todos),
       title: dto.title,
       description: dto.description ?? '',
       status: dto.status ?? TodoStatus.OPEN,
       priority: dto.priority ?? TodoPriority.MEDIUM,
-      categoryID: dto.categoryID,
-      userID: dto.userID,
+      categoryId: dto.categoryID,
+      userId: dto.userID,
       created_at: new Date(),
       updated_at: new Date(),
     };

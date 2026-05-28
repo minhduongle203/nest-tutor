@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CategoryEntity } from '../../entities/category.entity';
+import { Categories } from '../../entities/category.entity';
 
 @Injectable()
 export class CategoryService {
-  private categories: CategoryEntity[] = [
+  private categories: Categories[] = [
     { id: 1, name: 'Web Development' },
     { id: 2, name: 'Mobile Development' },
     { id: 3, name: 'Data Science' },

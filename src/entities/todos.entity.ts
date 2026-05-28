@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class TodosEntity {
+export class Todos {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -22,14 +22,14 @@ export class TodosEntity {
   @Column({ type: 'enum', enum: TodoStatus, default: TodoStatus.OPEN })
   status: TodoStatus;
 
-  @Column({ type: 'enum', enum: TodoPriority, default: TodoPriority.MEDIUM })
+  @Column({ type: 'enum', enum: TodoPriority, nullable: true })
   priority: TodoPriority;
 
   @Column()
-  userID: number;
+  userId: number;
 
   @Column({ nullable: true })
-  categoryID?: number;
+  categoryId?: number;
 
   @CreateDateColumn()
   created_at: Date;

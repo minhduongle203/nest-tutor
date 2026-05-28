@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { UserEntity } from '../../entities/user.entity';
+import { Users } from '../../entities/user.entity';
 
 @Injectable()
 export class UserService {
-  private users: UserEntity[] = [
+  private users: Users[] = [
     { id: 1, name: 'An' },
     { id: 2, name: 'Bình' },
   ];
