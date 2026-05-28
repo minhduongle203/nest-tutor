@@ -19,7 +19,7 @@ export class TodosController {
   constructor(private todosService: TodosService) {}
   @Get()
   getTodos() {
-    return 'Todos!';
+    return this.todosService.getAll();
   }
 
   @Get('query')

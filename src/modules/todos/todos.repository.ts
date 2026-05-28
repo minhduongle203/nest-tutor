@@ -1,10 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { Todos } from '../../entities/todos.entity';
-import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { TodoStatus } from './enum/todo-status.enum';
-import { TodoPriority } from './enum/todo-priority.enum';
 import { Injectable } from '@nestjs/common';
 
 const TODO_FILE = path.join(__dirname, 'todo.json');
@@ -35,23 +32,23 @@ export class TodosRepository {
     return todos.find((todo) => todo.id === id);
   }
 
-  create(dto: CreateTodoDto) {
-    const todos = this.readFromFile();
-    const newTodo: Todos = {
-      id: this.getNextId(todos),
-      title: dto.title,
-      description: dto.description ?? '',
-      status: dto.status ?? TodoStatus.OPEN,
-      priority: dto.priority ?? TodoPriority.MEDIUM,
-      categoryId: dto.categoryID,
-      userId: dto.userID,
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-    todos.push(newTodo);
-    this.writeToFile(todos);
-    return newTodo;
-  }
+  // create(dto: CreateTodoDto) {
+  //   const todos = this.readFromFile();
+  //   const newTodo: Todos = {
+  //     id: this.getNextId(todos),
+  //     title: dto.title,
+  //     description: dto.description ?? '',
+  //     status: dto.status ?? TodoStatus.OPEN,
+  //     priority: dto.priority ?? TodoPriority.MEDIUM,
+  //     categoryId: dto.categoryID,
+  //     userId: dto.userID,
+  //     created_at: new Date(),
+  //     updated_at: new Date(),
+  //   };
+  //   todos.push(newTodo);
+  //   this.writeToFile(todos);
+  //   return newTodo;
+  // }
 
   update(id: number, updateDto: UpdateTodoDto) {
     const todos = this.readFromFile();

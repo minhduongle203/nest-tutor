@@ -4,10 +4,18 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Users } from './user.entity';
+import { Categories } from './category.entity';
 
+@Index(['userId'])
+@Index(['categoryId'])
+@Index(['userId', 'title'])
 @Entity()
 export class Todos {
   @PrimaryGeneratedColumn()
@@ -23,13 +31,26 @@ export class Todos {
   status: TodoStatus;
 
   @Column({ type: 'enum', enum: TodoPriority, nullable: true })
+  @Index('idx_todos_priority_high', { where: `"priority" = 'HIGH'` })
   priority: TodoPriority;
 
   @Column()
   userId: number;
 
+  @ManyToOne(() => Users, (user) => user.todos, { onDelete: 'CASCADE' })
+  @JoinColumn({
+    name: 'userId',
+  })
+  user: Users;
+
   @Column({ nullable: true })
   categoryId?: number;
+
+  @ManyToOne(() => Categories, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({
+    name: 'categoryId',
+  })
+  category: Categories;
 
   @CreateDateColumn()
   created_at: Date;

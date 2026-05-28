@@ -2,11 +2,16 @@ import { Todos } from '../../entities/todos.entity';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { QueryParamsDto } from './dto/query-params.dto';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CategoryService } from '../categories/category.sevice';
 import { UserService } from '../user/user.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { Users } from '../../entities/user.entity';
 
 @Injectable()
 export class TodosService {
@@ -15,7 +20,12 @@ export class TodosService {
     private readonly todoRepo: Repository<Todos>,
     private readonly categoriesService: CategoryService,
     private readonly userService: UserService,
+    private readonly dataSource: DataSource,
   ) {}
+
+  async getAll(): Promise<Todos[]> {
+    return this.todoRepo.find({ relations: ['category', 'user'] });
+  }
 
   async findAll(queryParamsDto: QueryParamsDto): Promise<Todos[]> {
     const page = queryParamsDto.page ?? 1;
@@ -28,13 +38,17 @@ export class TodosService {
       where,
       take: limit,
       skip: start,
+      relations: ['category', 'user'],
     });
 
     return todos;
   }
 
   async findById(id: number) {
-    const todos = await this.todoRepo.findOne({ where: { id } });
+    const todos = await this.todoRepo.findOne({
+      where: { id },
+      relations: ['category', 'user'],
+    });
     if (!todos) {
       throw new Error('Failed');
     }
@@ -42,29 +56,72 @@ export class TodosService {
   }
 
   async create(dto: CreateTodoDto) {
-    const user = this.userService.findById(dto.userID);
+    const user = await this.userService.findById(dto.userID);
+
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException({
+        message: 'User not found',
+        errorCode: 'USER_NOT_FOUND',
+        field: 'userID',
+        statusCode: 404,
+      });
     }
+
     if (dto.categoryID) {
-      const category = this.categoriesService.findById(dto.categoryID);
+      const category = await this.categoriesService.findById(dto.categoryID);
+
       if (!category) {
-        throw new Error('Category not found');
+        throw new NotFoundException({
+          message: 'Category not found',
+          errorCode: 'CATEGORY_NOT_FOUND',
+          field: 'categoryID',
+          statusCode: 404,
+        });
       }
     }
 
     const existingTodo = await this.todoRepo.findOne({
       where: { title: dto.title },
     });
-    if (!existingTodo) {
+
+    if (existingTodo) {
       throw new BadRequestException({
-        message: 'Category not found',
+        message: 'Todo already exists',
         errorCode: 'TODO_DUPLICATE',
         field: 'title',
         statusCode: 400,
       });
     }
-    return this.todoRepo.create(dto);
+
+    const todo = this.todoRepo.create({
+      ...dto,
+      userId: dto.userID,
+      categoryId: dto.categoryID,
+    });
+
+    // return this.dataSource.transaction(async (manager) => {
+    //   const saveTodos = manager.save(Todos, todo);
+    //   await manager.update(Users, dto.userID, { lastActivityAt: new Date() });
+    //   return saveTodos;
+    // });
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const saveTodos = await queryRunner.manager.save(Todos, todo);
+      await queryRunner.manager.update(Users, dto.userID, {
+        lastActivityAt: new Date(),
+      });
+      await queryRunner.commitTransaction();
+      return saveTodos;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async update(id: number, updateDto: UpdateTodoDto) {
