@@ -13,6 +13,6 @@ export default registerAs(DATABASE_REGISTER, () => ({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   entities: [Todos, Categories, Users],
-  synchronize: true,
+  synchronize: process.env.NODE_ENV !== 'production',
   logging: true,
 }));
